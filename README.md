@@ -10,25 +10,23 @@ I designed the system, wrote its rules, made every go/no-go decision, and ran it
 
 ## At a glance
 
-| | |
-|---|---|
-| **Runs** | 150 scheduled cycles, Jun 26 – Aug 19, 2026: 34 deep research runs and 101 check-ups |
-| **Broker access** | Robinhood's MCP (Model Context Protocol) connector: quotes, stock screens, positions, order review, order placement |
-| **Agent** | Claude, running in the Claude desktop app, following a ~900-line written protocol |
-| **Code** | Bash safety gate, Python dashboard generator, JSONL logs |
-| **Outcome** | Live picks lost money and trailed a buy-and-hold S&P 500 (SPY) benchmark. The evaluation layer caught it, and live picking was frozen |
+- **Runs:** 150 scheduled cycles, Jun 26 – Aug 19, 2026: 34 deep research runs and 101 check-ups.
+- **Broker access:** Robinhood's MCP (Model Context Protocol) connector for quotes, stock screens, positions, order review and order placement.
+- **Agent:** Claude, running in the Claude desktop app, following a ~900-line written protocol.
+- **Code:** Bash safety gate, Python dashboard generator, JSONL logs.
+- **Outcome:** live picks lost money and trailed a buy-and-hold S&P 500 (SPY) benchmark. The evaluation layer caught it, and live picking was frozen.
 
 ## How one cycle works
 
 ```mermaid
-flowchart LR
-    G[0. Gate<br/>gate.sh] --> M[0.5 Memory<br/>past trades, breakers]
-    M --> U[1. Universe<br/>holdings, scans,<br/>Reddit, news]
-    U --> R[2. Research<br/>technicals, analysts,<br/>options flow, macro]
-    R --> S[3. Synthesis<br/>bull vs. bear,<br/>pre-mortem]
-    S --> P[4. Manage<br/>stops, exits]
-    P --> E[5. Enter<br/>filters, sizing]
-    E --> D[6. Deliver<br/>logs, report,<br/>dashboard, push]
+flowchart TD
+    G["0. Gate: gate.sh"] --> M["0.5 Memory: past trades, circuit breakers"]
+    M --> U["1. Universe: holdings, scans, Reddit, news"]
+    U --> R["2. Research: technicals, analysts, options flow, macro"]
+    R --> S["3. Synthesis: bull vs. bear, pre-mortem"]
+    S --> P["4. Manage: stops, exits"]
+    P --> E["5. Enter: filters, position sizing"]
+    E --> D["6. Deliver: logs, report, dashboard, phone push"]
 ```
 
 | Phase | What happens |
