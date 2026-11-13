@@ -1,0 +1,2 @@
+# The code itself uses only the Python standard library; this is for running the tests.
+pytest==8.4.2

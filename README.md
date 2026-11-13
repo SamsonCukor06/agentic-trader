@@ -1,5 +1,7 @@
 # Agentic Trader
 
+[![tests](https://github.com/SamsonCukor06/agentic-trader/actions/workflows/tests.yml/badge.svg)](https://github.com/SamsonCukor06/agentic-trader/actions/workflows/tests.yml)
+
 An autonomous LLM agent that researched stocks and traded a small real-money brokerage account four times a day for eight weeks (June–August 2026), plus the evaluation tooling that showed its stock picking didn't work.
 
 I designed the system, wrote its rules, made every go/no-go decision, and ran it with my own money. Most of the code and protocol text was written with [Claude Code](https://claude.com/claude-code) as a coding partner.
@@ -13,7 +15,7 @@ I designed the system, wrote its rules, made every go/no-go decision, and ran it
 - **Runs:** 150 scheduled cycles, Jun 26 – Aug 19, 2026: 34 deep research runs and 101 check-ups.
 - **Broker access:** Robinhood's MCP (Model Context Protocol) connector for quotes, stock screens, positions, order review and order placement.
 - **Agent:** Claude, running in the Claude desktop app, following a ~900-line written protocol.
-- **Code:** Bash safety gate, Python dashboard generator, JSONL logs.
+- **Code:** Bash safety gate, Python dashboard generator, JSONL logs, and a pytest suite that GitHub Actions runs on every push.
 - **Outcome:** live picks lost money and trailed a buy-and-hold S&P 500 (SPY) benchmark. The evaluation layer caught it, and live picking was frozen.
 
 ## How one cycle works
@@ -84,12 +86,30 @@ What I did about it:
 - Keep the learning loop running in every mode.
 - Start from a simple baseline (buy and hold the index) and make every change prove it beats that.
 
+## Tests
+
+The tests in `tests/` run on every push through GitHub Actions, on both Ubuntu and macOS ([workflow](.github/workflows/tests.yml)). They never touch a real account or the live state folder.
+
+- **`test_gate.py`** runs the real `gate.sh` with a pinned clock and a temporary home folder. It checks that orders are allowed only when armed, not killed, and in regular hours, and that the kill switch overrides arming. It also covers the 9:30 and 4:00 bells, weekends, NYSE holidays, 1:00 pm early closes, daylight saving time, and the `--heartbeat` file.
+- **`test_dashboard.py`** runs `dashboard.py`'s math on the real ledger in `sample-data/`. It includes a regression test for the unit bug: with the AAPL row put back to `8.08`, the dashboard must still report −3.37% per trade as of the Aug 12 review. A companion test removes the fix and confirms the same data then reads as profitable, so the regression test can actually fail.
+
+The drawdown breaker, sector caps and other entry rules are part of the written protocol the agent follows, not code, so these tests don't cover them.
+
+To run them:
+
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
+
 ## What's in this repo
 
 | Folder | Contents |
 |---|---|
 | `protocol/` | The rulebook the agent follows every cycle |
 | `code/` | `gate.sh` (safety gate), `dashboard.py` (dashboard generator), `notify.sh` (phone notifications) |
+| `tests/` | pytest tests for `gate.sh` and `dashboard.py` |
+| `.github/workflows/` | The GitHub Actions workflow that runs the tests |
 | `sample-data/` | The real trade ledger, equity snapshots, shadow ledger, paper trades and lessons (private IDs removed) |
 | `sample-reports/` | Three reports the agent wrote: a deep research run, a strategy review, and a check-up |
 | `images/` | Dashboard screenshot |
